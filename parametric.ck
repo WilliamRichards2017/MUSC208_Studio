@@ -300,5 +300,17 @@ spork ~ v1(1);
 spork ~ outro();
 5::second => now;
 
+ //Unchuck sound and pans from dac
+ wgf =<  p =< dac;
+ high =< dac;
+ high2 =< dac;
+ scratch =< p =< dac;
+ hit2 =< p =< dac;
+ gucci =< p =< dac;
+ dusty =< dac;
+ belt =< dac;
+ yeah =< p =< dac;
+ brooklyn =< dac;
+
 
 1::day => now;
