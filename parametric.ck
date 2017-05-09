@@ -4,17 +4,77 @@
 * Parametric Composition
 */
 
-SndBuf wgf => dac;
+SndBuf wgf => Pan2 p=> dac;
 SndBuf high => dac;
 SndBuf high2 => dac;
-SndBuf scratch => dac;
-SndBuf hit2 => dac;
-SndBuf gucci => dac;
+SndBuf scratch => p => dac;
+SndBuf hit2 => p => dac;
+SndBuf gucci => p => dac;
 SndBuf com => dac;
 SndBuf dusty => dac;
 SndBuf belt => dac;
 SndBuf yeah => dac;
 SndBuf brooklyn => dac;
+
+fun void panLoop(){
+    
+    while( true )
+    {
+        // modulate the pan
+        Math.sin( now / 1::second *2 * pi ) => p.pan;
+        // advance time
+        20::ms => now;
+    }
+    }
+    
+    
+    // midi note of 60 corresponds to middle c
+    //C	C#	D	D#	E	F	F#	G	G#	A	A#	B
+    [0,1,2,3,4,5,6,7,8,9,10,11] @=> int baseoctave[];
+    0 => int c;
+    1 => int cs;
+    2 => int d;
+    3 => int ds;
+    4 => int e;
+    5 => int f;
+    6 => int fs;
+    7 => int g;
+    8 => int gs;
+    9 => int a;
+    10 => int as;
+    11 => int b;
+    
+    [a,f] @=> int notes[];
+    
+    
+    fun int[] convertOctave(int midiNotes[], int octave) {
+        
+        for (0 => int i; i < midiNotes.cap();  i++) {
+            midiNotes[i] + octave*12 => midiNotes[i];
+        }
+        
+        return midiNotes;
+    }
+    
+    fun void midiNotes(int notes[], int octave, int n) {
+        SinOsc sin => dac;
+        
+        convertOctave(notes, octave) @=> notes;
+        
+        for (0 => int j; j < n; j++) {
+            for (0 => int i; i < notes.cap();  i++) {
+                .4 => sin.gain;        
+                std.mtof(notes[i]) => sin.freq;
+                
+                125*2::ms => now;
+                
+                0.0 => sin.freq;
+            }     
+        }     
+    }
+    
+
+
 
 
 // Load in sound files
@@ -24,7 +84,7 @@ me.dir() + "audio/wgf.aiff" => wgf.read;
 me.dir() + "audio/wavDir4/2Hit.wav" => hit2.read;
 me.dir() + "audio/high.wav" => high.read;
 me.dir() + "audio/high2.wav" => high2.read;
-me.dir() + "audio/wavDir2/gucci_speaks.wav" => gucci.read;
+me.dir() + "audio/wavDir2/gucci.wav" => gucci.read;
 me.dir() + "audio/wavDir1/count_on_me_2.wav" => com.read;
 me.dir() + "audio/wavDir1/big_dusty.wav" => dusty.read;
 me.dir() + "audio/wavDir2/belt.wav" => belt.read;
@@ -39,15 +99,15 @@ scratch.samples() => scratch.pos;
 wgf.samples() => wgf.pos;
 hit2.samples() => hit2.pos;
 gucci.samples()=> gucci.pos;
-com.samples() => com.pos;
 high.samples() => high.pos;
 belt.samples() => belt.pos;
 yeah.samples() => yeah.pos;
 brooklyn.samples() => brooklyn.pos;
 
-
-
-
+0.3 => wgf.gain;
+0.3 => hit2.gain;
+0.3 => gucci.gain;
+0.3 => scratch.gain;
 
 
 
@@ -59,35 +119,27 @@ brooklyn.samples() => brooklyn.pos;
 
 fun void main(int n) {
     for (0 => int i; i < n*16; i++) {
-       i % 16 => int beat;
+       i % 16 => int beat;     
        
        if (beat==0) {
            0 => wgf.pos; 
            0 => scratch.pos;
        }  
-      if (beat == 4) {
-          0 => scratch.pos;
-               
-       }    
-       
+       if (beat == 4) {
+          0 => scratch.pos;            
+       }          
        if (beat == 8) {
            0 => hit2.pos;
-           }
-           
+       }     
        if (beat == 12) {
-         
-         0 => hit2.pos;
-           }
-           
-           if (beat==14) {
-            0 => high.pos;                }   
-           
-        125::ms => now;     
-        }
-    
-    }
-    
-    
+           0 => hit2.pos;
+       }           
+       125::ms => now;     
+   }
+   
+}
+
+
     
     fun void v1(int n) {
         for (0 => int i; i < n*16; i++) {
@@ -96,34 +148,28 @@ fun void main(int n) {
             if (beat==0) {
                 0 => wgf.pos; 
                 0 => scratch.pos;
-            }  
-            if (beat == 4) {
-                0 => scratch.pos;
-                
-            }    
-            
-        
-            
-            if (beat == 8) {
-               0 => com.pos;
-               
+            }
+              
+              if (beat == 4) {
+                  0 => scratch.pos;            
+              }    
+              
+              if (beat == 8) {
+               0 => hit2.pos;          
+           }
+           
+           if (beat == 10) {
+               0 => belt.pos;
             }
             
-            if (beat == 10) {
-                0 => belt.pos;
-                }
-            
-            if (beat == 12) {
-                
+            if (beat == 12) {    
                 0 => hit2.pos;
             }
-                  
+            
             125::ms => now;     
         }
         
     }
-    
-   
     
     fun void v2(int n) {
         for (0 => int i; i < n*16; i++) {
@@ -134,28 +180,20 @@ fun void main(int n) {
                 0 => scratch.pos;
             }  
             if (beat == 4) {
-                0 => scratch.pos;
-                
-            }    
-            
-        
+                0 => scratch.pos;            
+            }            
             if (beat == 8 || beat == 12) {
                 0 => gucci.pos;       
                 0 => belt.pos;               
             }
-            
             if (beat==10) {
-               // 0 => belt.pos;
-                }
-            
-            if (beat == 12) {
-                
-                0 => hit2.pos;
+                // 0 => belt.pos;
             }
-            
+            if (beat == 12) {
+                0 => hit2.pos;
+            }   
             125::ms => now;     
         }
-        
     }
     
     fun void v3(int n) {
@@ -164,33 +202,41 @@ fun void main(int n) {
             
             if (beat==0) {
                 0 => wgf.pos; 
+                0 => high.pos; 
+                0 => high2.pos;
             }  
             if (beat == 4) {
                 0 => scratch.pos;
+                0 => high.pos; 
+                0 => high2.pos;
                 
             }    
             
             if (beat == 8) {
                 0 => hit2.pos;
+                0 => high.pos; 
+                0 => high2.pos;
             }
             
             if (beat == 12) {
                 0 => belt.pos;
                 0 => hit2.pos;
+                
             }
             
             if (beat==14) {
-               0 => high.pos;
-               
-            }
                 
-                125::ms => now;     
+                
+                
+            }
+            
+            125::ms => now;     
             }
             
         }
         
-
-
+        
+        
 fun void outro ()  {
     
     1.5 => float f;
@@ -204,17 +250,16 @@ fun void outro ()  {
         0 => wgf.pos;
         0 => yeah.pos;
         1::second => now;
-        }
-        1::second => now;
-        0 => brooklyn.pos;
-    
     }
- 
+    1::second => now;
+    0 => brooklyn.pos;
+    
+}
 
-//Run program forever
+
 3::second => now;
-
-
+spork ~ midiNotes(notes, 2, 24);
+spork ~ panLoop();
 spork ~ main(1);
 2::second => now;
 spork ~ v1(1);
@@ -232,9 +277,10 @@ spork ~ v1(1);
 spork ~ main(1);
 2::second => now;
 spork ~ v3(1);
+2::second => now;
 
 1 => wgf.rate; 
-spork ~ main(1);
+spork ~ v2(1);
 2::second => now;
 spork ~ v1(1);
 2::second => now;
@@ -243,12 +289,9 @@ spork ~ main(1);
 spork ~ v1(1);
 2::second => now;
 spork ~ outro();
+5::second => now;
 
-
-
-
-
-
+wgf => blackhole;
 
 
 1::day => now;
