@@ -10,11 +10,14 @@ SndBuf high2 => dac;
 SndBuf scratch => p => dac;
 SndBuf hit2 => p => dac;
 SndBuf gucci => p => dac;
-SndBuf com => dac;
 SndBuf dusty => dac;
 SndBuf belt => dac;
-SndBuf yeah => dac;
+SndBuf yeah => p => dac;
 SndBuf brooklyn => dac;
+
+fun float randGain() {
+    return Std.rand2f( 0.3, 0.9);
+    }
 
 fun void panLoop(){
     
@@ -23,7 +26,7 @@ fun void panLoop(){
         // modulate the pan
         Math.sin( now / 1::second *2 * pi ) => p.pan;
         // advance time
-        20::ms => now;
+        10::ms => now;
     }
     }
     
@@ -44,7 +47,7 @@ fun void panLoop(){
     10 => int as;
     11 => int b;
     
-    [a,f] @=> int notes[];
+    [a,f,a,g] @=> int notes[];
     
     
     fun int[] convertOctave(int midiNotes[], int octave) {
@@ -66,7 +69,7 @@ fun void panLoop(){
                 .4 => sin.gain;        
                 std.mtof(notes[i]) => sin.freq;
                 
-                125*2::ms => now;
+                125::ms => now;
                 
                 0.0 => sin.freq;
             }     
@@ -83,9 +86,8 @@ me.dir() + "audio/wavDir3/dj_scratch.wav" => scratch.read;
 me.dir() + "audio/wgf.aiff" => wgf.read;
 me.dir() + "audio/wavDir4/2Hit.wav" => hit2.read;
 me.dir() + "audio/high.wav" => high.read;
-me.dir() + "audio/high2.wav" => high2.read;
+me.dir() + "audio/high2.aiff" => high2.read;
 me.dir() + "audio/wavDir2/gucci.wav" => gucci.read;
-me.dir() + "audio/wavDir1/count_on_me_2.wav" => com.read;
 me.dir() + "audio/wavDir1/big_dusty.wav" => dusty.read;
 me.dir() + "audio/wavDir2/belt.wav" => belt.read;
 me.dir() + "audio/wavDir3/jay_yeah.wav" => yeah.read;
@@ -100,6 +102,7 @@ wgf.samples() => wgf.pos;
 hit2.samples() => hit2.pos;
 gucci.samples()=> gucci.pos;
 high.samples() => high.pos;
+high2.samples() => high2.pos;
 belt.samples() => belt.pos;
 yeah.samples() => yeah.pos;
 brooklyn.samples() => brooklyn.pos;
@@ -129,9 +132,11 @@ fun void main(int n) {
           0 => scratch.pos;            
        }          
        if (beat == 8) {
+           randGain() => hit2.gain;   
            0 => hit2.pos;
        }     
        if (beat == 12) {
+           randGain() => hit2.gain;   
            0 => hit2.pos;
        }           
        125::ms => now;     
@@ -155,14 +160,17 @@ fun void main(int n) {
               }    
               
               if (beat == 8) {
+               randGain() => hit2.gain;   
                0 => hit2.pos;          
            }
            
            if (beat == 10) {
+               randGain() => belt.gain;  
                0 => belt.pos;
             }
             
-            if (beat == 12) {    
+            if (beat == 12) {  
+                randGain() => hit2.gain;     
                 0 => hit2.pos;
             }
             
@@ -183,13 +191,16 @@ fun void main(int n) {
                 0 => scratch.pos;            
             }            
             if (beat == 8 || beat == 12) {
-                0 => gucci.pos;       
+                0 => gucci.pos;   
+                randGain() => belt.gain;    
                 0 => belt.pos;               
             }
             if (beat==10) {
-                // 0 => belt.pos;
+                //randGain() => belt.gain;   
+                //0 => belt.pos;
             }
             if (beat == 12) {
+                randGain() => hit2.gain;   
                 0 => hit2.pos;
             }   
             125::ms => now;     
@@ -203,30 +214,28 @@ fun void main(int n) {
             if (beat==0) {
                 0 => wgf.pos; 
                 0 => high.pos; 
-                0 => high2.pos;
             }  
+            
             if (beat == 4) {
                 0 => scratch.pos;
                 0 => high.pos; 
-                0 => high2.pos;
                 
             }    
             
             if (beat == 8) {
                 0 => hit2.pos;
                 0 => high.pos; 
-                0 => high2.pos;
             }
             
             if (beat == 12) {
-                0 => belt.pos;
                 0 => hit2.pos;
-                
+                0 => high.pos; 
+                0 => high2.pos;
             }
             
             if (beat==14) {
-                
-                
+            randGain() => belt.gain;    
+            0 => belt.pos;
                 
             }
             
@@ -290,8 +299,6 @@ spork ~ v1(1);
 2::second => now;
 spork ~ outro();
 5::second => now;
-
-wgf => blackhole;
 
 
 1::day => now;
